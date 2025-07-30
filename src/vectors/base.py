@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+import uuid
 import numpy as np
 from ..pipeline import Tokenizer
 
@@ -100,7 +101,7 @@ class Vectors :
 
         ids,dimensions,batches,stream = [],None,0,None
 
-        vectorsid = self.vectorsid if checkpoint else None
+        vectorsid = self.vectorsid() if checkpoint else None
         recovery = Recovery(checkpoint,vectorsid,self.loadembeddings) if checkpoint else None
 
         with self.spool(checkpoint,vectorsid) as output:
@@ -130,6 +131,58 @@ class Vectors :
                     batches += 1
 
             return (ids,dimensions,batches,stream)
+        
+
+    def vectorsid(self):
+
+        select =["path","method","tokenizer", "maxlength", "tokenize", "instructions", "dimensionality", "quantize"]
+        config ={k:v for k,v in self.config.items() if k in select}
+
+        config.update(config.get("vectors",{}))
+        return str(uuid.uuid5(uuid.NAMESPACE_DNS,json.dumps(config,sort_keys= True)))
+    
+    def spool(self,checkpoint,vectorsid ):
+
+        if checkpoint :
+
+            os.makedirs(checkpoint,exist_ok=True)
+
+            return open(f"{checkpoint}/vectorsid","wb")
+        
+        return tempfile.NamedTemporaryFile(mode ="wb",suffix =".npy", delete = False )
+    
+    def batch(self,documents,output,recovery) :
+        # extract ids and clean input
+
+        ids = [uid for uid,_,_ in documents]
+        documents =[self.prepare(data,"data") for _,data,_ in documents]
+
+        embeddings = recovery() if recovery else None
+
+        embeddings = self.vectorize(documents,"data") if embeddings is None else embeddings
+
+        if embeddings is not None :
+
+            dimensions = embeddings.shape[1]
+            self.saveembeddings(output,embeddings)
+
+        return (ids,dimensions)
+    
+    def saveembeddings(self,f,embeddings):
+
+        return np.save(f,embeddings,allow_pickle=False)
+           
+    
+    def loadembeddings(self,f):
+
+        return np.load(f,allow_pickle= False)
+    
+    
+
+
+        
+   
+
 
 
 

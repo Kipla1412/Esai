@@ -29,7 +29,7 @@ class STVectors(Vectors):
     def loadmodel(self,path): 
         """ This method is used to load the model and check the device speciality and add new parameters in vectors"""
 
-        gpu ,pool = self.config.get(gpu,True), False
+        gpu ,pool = self.config.get("gpu",True), False
 
         if isinstance(gpu,str) and gpu == "all":
 
