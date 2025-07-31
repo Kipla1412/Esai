@@ -1,4 +1,4 @@
-"""
+
 from src.vectors.dense import STVectors
 import numpy as np
 docs = [
@@ -16,34 +16,32 @@ config = {
 
 vectorizer = STVectors(config=config, scoring=None, models={})
 
-ids, dims, batches, path = vectorizer.index(docs)
+ids, dims, batches, stream = vectorizer.index(docs)
 
-print("✅ Vectorization complete")
+print("Vectorization complete")
 print(f"Doc IDs: {ids}")
 print(f"Dimension: {dims}")
-print(f"Saved file: {path}")
+print(f"Saved file: {stream}")
 
 
-import numpy as np
-
-vectors = np.load("C:/Users/KIPLAT~1/AppData/Local/Temp/tmpempqxaft.npy")
+vectors = np.load(stream)
 print("Vectors shape:", vectors.shape)
 print(vectors[0][:10])
-"""
-from src.vectors.dense import STVectors
 
-config = {
-    "path": "all-MiniLM-L6-v2",
-    "encodebatch": 2,
-    "dimensionality": 384,
-    "gpu": False
-}
+# from vectors.dense import STVectors
 
-vectorizer = STVectors(config=config, scoring=None, models={})
+# config = {
+#     "path": "all-MiniLM-L6-v2",
+#     "encodebatch": 2,
+#     "dimensionality": 384,
+#     "gpu": False
+# }
 
-# Encode new sentence
-text = "Graph neural networks are useful for social network analysis."
-vec = vectorizer.encode([text])
+# vectorizer = STVectors(config=config, scoring=None, models={})
 
-print("Encoded Vector Shape:", vec.shape)
-print("Vector Sample:", vec[0][:10])  # print first 10 values
+# # Encode new sentence
+# text = "Graph neural networks are useful for social network analysis."
+# vec = vectorizer.encode([text])
+
+# print("Encoded Vector Shape:", vec.shape)
+# print("Vector Sample:", vec[0][:10])  # print first 10 values
