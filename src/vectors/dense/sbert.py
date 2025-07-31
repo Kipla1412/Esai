@@ -44,24 +44,26 @@ class STVectors(Vectors):
 
         if pool :
 
-            self.pool = model. model.start_multi_process_pool()
+            self.pool = model.start_multi_process_pool()
+
 
         return model
     
-    def encode(self,data,catagory =None):
+    def encode(self,data,category =None):
 
         """ this method is used to encode the data first catagory wise  check next encode the data """
 
-        encode = self.model.encode_query if catagory =="query" else self.model.encode_document if  catagory =="data" else self.model.encode
+        #encode = self.model.encode_query if category == "query" else self.model.encode_document if category == "data" else self.model.encode
+        encode = self.model.encode
 
-        encodeargs = self.config.get("encodeargs",{})
+        encodeargs = self.config.get("encodeargs", {})
 
         return encode (data , pool =self.pool, batch_size = self.encodebatch, **encodeargs)
     
     def close(self):
         """ this method is used to close the pool's before close the parent """
         if self.pool:
-            self.pool.stop_multi_process_pool(self.pool)
+            self.model.stop_multi_process_pool(self.pool)
 
             self.pool =None
 
@@ -70,7 +72,7 @@ class STVectors(Vectors):
     def loadencoder(self,path,device,**kwargs):
         """ its return the sentence transformer model """
 
-        return SentenceTransformer(path= path, device=device,**kwargs)
+        return SentenceTransformer(path, device=device,**kwargs)
 
 
 

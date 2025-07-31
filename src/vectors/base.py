@@ -5,7 +5,7 @@ import uuid
 import numpy as np
 from ..pipeline import Tokenizer
 
-from .dense import factory,sbert
+#from .dense import sbert
 from .recovery import Recovery
 
 class Vectors : 
@@ -21,7 +21,7 @@ class Vectors :
 
             self.model = self.load(config.get("path"))
             self.encodebatch = self.config.get("encodebatch", 32)
-            self.dimensionality = self.config.get("dimensionality")
+            #self.dimensionality = self.config.get("dimensionality")
 
     def loadmodel(self,path):
 
@@ -97,7 +97,7 @@ class Vectors :
 
         return embeddings
     
-    def index(self,documents,batch_size =500,checkpoint =None):
+    def index(self,documents,batchsize =500,checkpoint =None):
 
         ids,dimensions,batches,stream = [],None,0,None
 
@@ -113,7 +113,7 @@ class Vectors :
             for document in documents:
                 batch.append(document)
 
-                if len(batch) == self.batch_size :
+                if len(batch) == batchsize :
 
                     uids,dimensions = self.batch(batch,output,recovery)
 

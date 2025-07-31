@@ -1,5 +1,6 @@
-from vectors.dense import STVectors
-
+"""
+from src.vectors.dense import STVectors
+import numpy as np
 docs = [
     ("doc1", "The quick brown fox jumps over the lazy dog.", {}),
     ("doc2", "Sentence Transformers are powerful.", {}),
@@ -21,3 +22,28 @@ print("✅ Vectorization complete")
 print(f"Doc IDs: {ids}")
 print(f"Dimension: {dims}")
 print(f"Saved file: {path}")
+
+
+import numpy as np
+
+vectors = np.load("C:/Users/KIPLAT~1/AppData/Local/Temp/tmpempqxaft.npy")
+print("Vectors shape:", vectors.shape)
+print(vectors[0][:10])
+"""
+from src.vectors.dense import STVectors
+
+config = {
+    "path": "all-MiniLM-L6-v2",
+    "encodebatch": 2,
+    "dimensionality": 384,
+    "gpu": False
+}
+
+vectorizer = STVectors(config=config, scoring=None, models={})
+
+# Encode new sentence
+text = "Graph neural networks are useful for social network analysis."
+vec = vectorizer.encode([text])
+
+print("Encoded Vector Shape:", vec.shape)
+print("Vector Sample:", vec[0][:10])  # print first 10 values
