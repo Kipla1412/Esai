@@ -97,6 +97,27 @@ class Vectors :
 
         return embeddings
     
+    def vectors(self,documents,batchsize = 500,checkpoint =None,buffer = None,dtype =None):
+
+        ids,dimensions,batches,stream = self.index(documents,batchsize,checkpoint)
+
+        embeddings =None
+        if ids:
+            embeddings =np.memmap(buffer,dtype=dtype,shape=(len(ids),dimensions),mode ="w+")
+
+            x = 0
+            with open(stream,"+rb") as queue :
+                for _ in range(batches):
+                    batch = self.loadembeddings(queue)
+                    embeddings[x : x + batch.shape[0]] = batch
+                    x += batch.shape[0]
+
+        if not checkpoint:
+            
+            os.remove(stream)
+
+        return (ids,dimensions,embeddings)
+
     def index(self,documents,batchsize =500,checkpoint =None):
 
         ids,dimensions,batches,stream = [],None,0,None
