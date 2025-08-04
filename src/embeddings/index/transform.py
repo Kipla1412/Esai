@@ -23,6 +23,8 @@ class Transform:
         self.text = columns.get("text", "text")
         self.object =columns.get("object","object")
 
+        self.indexing = embeddings.model or embeddings.scoring
+
     def __call__(self,documents,buffer):
 
         ids,dimensions,embeddings = None,None,None
