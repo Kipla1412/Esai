@@ -3,11 +3,11 @@ import os
 import json
 import tempfile
 
-from ..vectors import VectorFactory
+from ..vectors import VectorsFactory
 from .index import Action, Configuration, Functions, Stream, Transform
 
 
-class Embeddings :
+class Embeddings:
 
     def __init__(self, config=None, models=None, **kwargs):
 
@@ -20,7 +20,7 @@ class Embeddings :
         # self.ids =None
         # self.function = None
 
-        config = {** config,**kwargs} if config and kwargs else kwargs if kwargs else config
+        config = {**config, **kwargs} if config and kwargs else kwargs if kwargs else config
 
         self.configure(config)
         
@@ -42,6 +42,8 @@ class Embeddings :
         with tempfile.NamedTemporaryFile(mode ="wb", suffix =".npy") as buffer:
 
             ids,dimensions,embeddings =transform(stream(documents),buffer)
+
+        return  ids,dimensions,embeddings
 
     def configure(self,config):
 
@@ -75,7 +77,7 @@ class Embeddings :
 
             self.config["path"] = dense
 
-        return VectorFactory.create(self.config,self.scoring,self.models)
+        return VectorsFactory.create(self.config,self.scoring,self.models)
     
     def close(self):
 

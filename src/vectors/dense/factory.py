@@ -1,44 +1,55 @@
+
+"""
+Factory module 
+"""
+
 from ...util import Resolver
 from .sbert import STVectors
 
-class VectorFactory:
-    
+
+class VectorsFactory:
+    """
+    Factory for creating Sentence Transformers vector models.
+    """
+
     @staticmethod
-    def create(config,scoring =None,models =None):
+    def create(config, scoring=None, models=None):
+        """
+        Create a Sentence Transformers vectors model.
 
-       method = VectorFactory.create(config)
+        Args:
+            config: vector configuration (must include "path")
+            scoring: scoring instance (optional)
+            models: models cache (optional)
 
-       if method == "sentence-transformers":
-           
-           return STVectors (config,scoring,models) if config and config("path") else None
-       
-       return VectorFactory.resolve(method,config,scoring,models) if method else None
-    
+        Returns:
+            STVectors instance or None
+        """
+        config = config or {}
+        method = VectorsFactory.method(config)
+
+        if method == "sentence-transformers":
+            return STVectors(config, scoring, models) if config.get("path") else None
+
+        return None  # No other vector types supported
+
     @staticmethod
     def method(config):
+        """
+        Get or derive the vector method.
+        Defaults to 'sentence-transformers' if path is given.
 
-        method =config.get("method")
+        Args:
+            config: vector configuration
+
+        Returns:
+            'sentence-transformers' or None
+        """
+        config = config or {}
+        method = config.get("method")
         path = config.get("path")
 
-        if not method:
-            if path:
-
-                if STVectors.ismodel(path):
-                     method = "transformers"
+        if not method and path:
+            method = "sentence-transformers"
 
         return method
-    
-    @staticmethod
-
-    def resolve(backend,config,scoring,models):
-
-        try:
-            Resolver()(backend)(config,scoring,models)
-
-        except Exception as e:
-            
-            raise ImportError(f"Unable to resolve vectors backend: '{backend}'") from e
-
-
-
-           

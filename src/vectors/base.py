@@ -198,7 +198,9 @@ class Vectors :
 
         return np.load(f,allow_pickle= False)
     
-    
+    def close(self):
+
+        self.model =None
 
 
         
