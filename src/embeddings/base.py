@@ -3,8 +3,9 @@ import os
 import json
 import tempfile
 
+from ..ann import ANNFactory
 from ..vectors import VectorsFactory
-from .index import Action, Configuration, Functions, Stream, Transform
+from .index import Action, Configuration, Functions, Stream, Transform,Reducer
 
 
 class Embeddings:
@@ -16,6 +17,8 @@ class Embeddings:
         self.model =None
         self.models = models
         self.scoring = None
+        self.reducer = None
+        self.ann = None
 
         # self.ids =None
         # self.function = None
@@ -31,7 +34,6 @@ class Embeddings:
 
         self.close()
 
-
     def index(self, documents,reindex = False,checkpoint =None):
 
         self.initindex(reindex)
@@ -42,8 +44,17 @@ class Embeddings:
         with tempfile.NamedTemporaryFile(mode ="wb", suffix =".npy") as buffer:
 
             ids,dimensions,embeddings =transform(stream(documents),buffer)
+            #return  ids,dimensions,embeddings
 
-        return  ids,dimensions,embeddings
+            if embeddings is not None:
+
+                if self.config.get('pca'):
+                    self.reducer = Reducer(embeddings,self.config('pca'))
+                    self.reducer(embeddings)
+
+                self.config["dimensions"] = dimensions
+
+                self.ann = self.createann()
 
     def configure(self,config):
 
@@ -78,6 +89,13 @@ class Embeddings:
             self.config["path"] = dense
 
         return VectorsFactory.create(self.config,self.scoring,self.models)
+    
+    def createann(self):
+
+        if self.ann :
+            self.ann.close
+
+        return ANNFactory.create(self.config) if self.config.get('path') or self.defaultallowed() else None 
     
     def close(self):
 

@@ -1,0 +1,10 @@
+[__init__]        <- prepare settings
+     |
+[load/save]       <- load/save index
+     |
+[index()]         <- build index from scratch
+     |
+[append()]        <- add more vectors
+[delete()]        <- remove vectors
+     |
+[search()]        <- query the index

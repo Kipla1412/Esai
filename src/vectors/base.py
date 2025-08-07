@@ -198,6 +198,10 @@ class Vectors :
 
         return np.load(f,allow_pickle= False)
     
+    def dot(self,queries,data):
+        
+        return np.dot(queries,data.T).tolist()
+    
     def close(self):
 
         self.model =None

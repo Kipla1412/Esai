@@ -5,3 +5,4 @@ from .functions import Functions
 from .documents import Documents
 from .stream import Stream
 from .transform import Transform
+from .reducer import Reducer
