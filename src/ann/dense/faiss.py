@@ -5,7 +5,7 @@ import platform
 from faiss import omp_set_num_threads
 from faiss import index_factory,IO_FLAG_MMAP,METRIC_INNER_PRODUCT ,read_index,write_index
 
-from faiss import index_binary_factory,read_binary_index,write_binary_index,IndexBinaryIDMap
+from faiss import index_binary_factory,read_index_binary,write_index_binary,IndexBinaryIDMap
 from ..base import ANN
 
 if platform.system() == 'Darwin':
@@ -23,7 +23,7 @@ class Faiss(ANN):
 
     def load(self,path):
         
-        readindex = read_binary_index if self.qbits else read_index
+        readindex = read_index_binary if self.qbits else read_index
 
         # load index 
         self.backend = readindex(path,IO_FLAG_MMAP if self.setting("mmap") is True  else 0)
@@ -91,11 +91,14 @@ class Faiss(ANN):
             results.append(list(zip(ids[x].tolist(), score.tolist())))
 
         return results
-
+    
+    def configure(self, count, train):
+        
+        return "IDMap,Flat"
 
     def save(self,path):
 
-        writeindex = write_binary_index if self.qbits else write_index
+        writeindex = write_index_binary if self.qbits else write_index
 
         writeindex(self.backend,path)
  

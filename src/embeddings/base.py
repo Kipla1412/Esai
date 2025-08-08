@@ -55,6 +55,7 @@ class Embeddings:
                 self.config["dimensions"] = dimensions
 
                 self.ann = self.createann()
+                self.ann.index(embeddings)
 
     def configure(self,config):
 
