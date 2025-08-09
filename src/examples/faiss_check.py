@@ -13,14 +13,14 @@ config = {
 
 embeddings = np.random.rand(100,32).astype("float32")
 
-faiss_index = Faiss(config=config,backend = None)
+faiss_index = Faiss(config=config)
 
 faiss_index.index(embeddings)
 
 faiss_index.save("test.index")
 print("Index saved as test.index") 
 
-faiss_load = Faiss(config, None)
+faiss_load = Faiss(config)
 
 faiss_load.load("test.index")
 

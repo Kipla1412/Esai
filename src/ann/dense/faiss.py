@@ -14,7 +14,7 @@ if platform.system() == 'Darwin':
 
 class Faiss(ANN):
 
-    def __init__(self,config,backend):
+    def __init__(self,config):
 
         super().__init__(config)
 

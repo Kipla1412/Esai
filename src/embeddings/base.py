@@ -19,6 +19,7 @@ class Embeddings:
         self.scoring = None
         self.reducer = None
         self.ann = None
+        self.scoring = None
 
         # self.ids =None
         # self.function = None
@@ -44,7 +45,8 @@ class Embeddings:
         with tempfile.NamedTemporaryFile(mode ="wb", suffix =".npy") as buffer:
 
             ids,dimensions,embeddings =transform(stream(documents),buffer)
-            #return  ids,dimensions,embeddings
+
+            # return  ids,dimensions,embeddings
 
             if embeddings is not None:
 
@@ -56,6 +58,11 @@ class Embeddings:
 
                 self.ann = self.createann()
                 self.ann.index(embeddings)
+
+            #return  ids,dimensions,embeddings
+
+        if self.issparse():
+            self.scoring.index()
 
     def configure(self,config):
 
@@ -97,6 +104,9 @@ class Embeddings:
             self.ann.close
 
         return ANNFactory.create(self.config) if self.config.get('path') or self.defaultallowed() else None 
+    
+    def issparse(self):
+        return self.scoring and self.scoring.issparse()
     
     def close(self):
 
