@@ -16,4 +16,16 @@ class Scoring:
     def insert(self,documents,index = None ,checkpoint =None):
 
         raise NotImplementedError
+    
+    def delete(self,ids):
+        raise NotImplementedError
+    
+    def index(self,documents =None):
+
+        if documents:
+
+            self.insert(documents)
+
+    def search(self,idf):
+        raise NotImplementedError
         
