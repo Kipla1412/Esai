@@ -25,6 +25,9 @@ class Scoring:
         if documents:
 
             self.insert(documents)
+            
+    def weights(self,tokens):
+        raise NotImplementedError
 
     def search(self,idf):
         raise NotImplementedError

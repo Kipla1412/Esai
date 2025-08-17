@@ -1,0 +1,17 @@
+USER QUERY
+   ↓
+TOKENIZE (batchsearch)
+   ↓
+RETRIEVE TOP-N CONTEXTS (vector store search)
+   ↓
+BUILD PROMPT (question + context)
+   ↓
+LLM GENERATES ANSWER
+   ↓
+[Optional] SNIPPETS (shorten from context)
+   ↓
+[Optional] REFERENCE (find best matching doc id)
+   ↓
+APPLY FORMAT (flatten, reference, default)
+   ↓
+FINAL OUTPUT

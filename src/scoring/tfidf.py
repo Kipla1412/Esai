@@ -152,3 +152,35 @@ class TFIDF(Scoring):
     def score(self,freq,idf,length):
 
         return idf* np.sqrt(freq) * (1/np.sqrt(length))
+
+    def search(self,qurey,limit = 3):
+
+        if self.terms:
+
+            query = self.tokenize(query) if isinstance(query,str) else query
+
+            scores = self.terms.search(query,limit)
+
+            if self.normalize and scores:
+                maxscore =min(scores[0][1]+self.avgscore , 6*self.avgscore)
+
+                scores = [(x ,min(score/maxscore ,1.0)) for x,score in scores]
+
+            return self.results(scores)
+        
+        return None
+    
+    def results(self,scores):
+
+        scores = [(x , float(score)) for x , score in scores]
+
+        if self.documents:
+            return [
+                {
+                    "id" : x, "text":self.documents[x], "score" : score
+                }
+                for x,score in scores
+            ]
+        return scores
+
+

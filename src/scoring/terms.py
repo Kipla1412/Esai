@@ -165,4 +165,61 @@ class Terms:
         self.deletes.extend([self.ids.index(i) for i in ids])
         # self.ids = ["doc1","doc2","doc3"]
         # self.ids.index("document") 
+
+    def search(self,query,limit):
+
+        scores = np.zeros(len(self.ids), dtype= np.float32)
+
+        terms,skipped,hasscore = Counter(terms),{},False
+        for term, freq in terms.items():
+
+            uids,weights = self.weights(term)#--> its return uids and weights --> doc freq,idf and document lengths like scoring
+
+            if uids is not None:
+                
+                if len(uids) <= self.cutoff * len(self.ids):
+
+                    scores[uids] += freq * weights
+
+                    hasscore = True # uncommon word to create score
+
+                else:
+                    skipped = [term] # common word used for future merging
+
+            return self.topn(scores,limit,hasscore,skipped)
         
+    def topn(self,scores,limit,hasscore,skipped):
+
+        topn = min(len(self.ids), limit* 5)
+        matches = self.candidates(scores,topn)
+
+        self.merge(scores,matches,hasscore,skipped)
+
+        if not hasscore:
+
+            matches = self.candidates(scores,topn)
+
+        matches = matches[np.argsort(-scores[matches])]
+
+        return [(self.ids[x], float(scores[x])) for x in matches[:limit] if scores > 0]
+    
+    def candidates(self,scores,topn):
+
+        scores[self.deletes] = 0
+        return np.argpartition(scores, -topn)[-topn:]
+    
+    def merge(self,scores,matches,hasscore,skipped):
+        
+        for term, freq in self.terms.items():
+
+            uids,weights = self.weights(term)
+
+            if hasscore:
+
+                indices = np.searchsorted(uids,matches)
+
+                indices = [x for i,x in enumerate(indices) if x < len(uids) and uids[x] ==  matches[i]]
+
+                uids, weights = uids[indices], weights[indices]
+
+            scores[uids] += freq * weights    
