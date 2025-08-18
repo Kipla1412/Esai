@@ -1,7 +1,7 @@
 
 from ..hfpipeline import HFPipeline
 
-class Lables(HFPipeline):
+class Labels(HFPipeline):
 
     def __init__(self,path = None,quantize =False,gpu=True,model =None,dynamic =True,**kwargs):
 

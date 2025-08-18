@@ -3,6 +3,7 @@ from ..data import Tokenizer
 from ..llm import LLM
 from .factory import GenerationFactory
 from ..text import Questions
+from ..text import Similarity
 from ...models import Models
 
 
@@ -90,7 +91,7 @@ class RAG(Pipeline):
             mnot =[token.strip("-") for token in query.split() if token.startswith("-") and len(token) > 1]
 
             segment = segments if texts else segment[i]
-            tokenlist = tokenlist if texts else tokenlist[i]
+            tokens = tokenlist if texts else tokenlist[i]
 
             # matches the query and context score
 
@@ -186,7 +187,7 @@ class RAG(Pipeline):
 
         answers = self.snippets(names,queries,topns,snippets)
         
-        if self.output == "flattern":
+        if self.output == "flatten":
 
             answers =[answer for _,answer in answers]
 
@@ -202,7 +203,52 @@ class RAG(Pipeline):
 
                 fields = ["name","answer","reference"] if isinstance(first,dict) and "name" in first else [None, "answers","reference"]
 
-                answers =[{fields[x] : column for x, column in enumerate(row)}for row in answers] 
+                answers =[{fields[x] : column for x, column in enumerate(row) if fields[x]}for row in answers]
+
+        return answers[0] if answers and  isinstance(inputs,(tuple,dict,str)) else answers 
+    
+    def snippets(self,names,answers,topns,snipetts):
+
+        results =[]
+
+        for x, answer in enumerate(answers):
+
+            if answer and snipetts[x]:
+
+                for _, text, _ in topns[x]:
+                    if answer in text:
+
+                        answer = text
+                        break
+            results.append(names[x],answer)
+
+        return results
+    
+    def reference(self,queries,answers,topns):
+
+        terms = self.terms(queries)
+        outputs =[]
+
+        for x, (name,answer) in answers:
+            
+            topn,reference = topns[x], None
+
+            if topn:
+
+                query = f"{terms[x]} {answers[x][1]}"
+
+                scores,_,_ = self.score([query],[text for _,text,_ in topn])
+
+                index = scores[0][0][0]
+
+                reference = topn[index[0]]
+
+            outputs.append((name,answer,topn))
+        return outputs
+
+    def terms(self,queries):
+
+        return self.similarity.batchterms(queries) if hasattr(self.similarity,"batchsterms") else(queries)
 
 
 
