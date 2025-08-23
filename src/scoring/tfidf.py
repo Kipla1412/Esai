@@ -1,8 +1,11 @@
-
+import math
+import os
+from multiprocessing.pool import ThreadPool
 from .base import Scoring
 from .terms import Terms
 from ..pipeline import Tokenizer
 from collections import Counter
+from ..serialize import Serializer
 import numpy as np
 
 class TFIDF(Scoring):
@@ -40,7 +43,7 @@ class TFIDF(Scoring):
 
         self.terms = Terms(self.config["terms"], self.scoring,self.idf) if self.config.get("terms") else None
 
-        documents = {} if self.config.get("content") else None
+        self.documents = {} if self.config.get("content") else None
 
         #6) Normalization
 
@@ -59,7 +62,7 @@ class TFIDF(Scoring):
 
                 uid = index if index is not None else uid
 
-                if isinstance(document(str,list)):
+                if isinstance(document,(str,list)):
 
                     if self.documents is not None:
                             
@@ -80,9 +83,9 @@ class TFIDF(Scoring):
 
             self.tokenizer = self.loadtokenizer()
 
-            return self.tokenizer(text)
+        return self.tokenizer(text)
         
-    def loadtokenizer(self,text):
+    def loadtokenizer(self):
 
         if self.config.get("tokenizer"):
 
@@ -92,7 +95,7 @@ class TFIDF(Scoring):
 
             return Tokenizer()
         
-        return Tokenizer.tokenize(text)
+        return Tokenizer.tokenize
     
     def addstats(self,tokens,tags):
 
@@ -127,7 +130,7 @@ class TFIDF(Scoring):
             #idf calculations
             idfs = self.computeidf(np.array(list(self.docfreq.values())))
 
-            for x ,word in self.docfreq.items():
+            for x ,word in enumerate(self.docfreq):
                 self.idf[word] = float(idfs[x])
 
             self.avgidf = float(np.mean(idfs))
@@ -153,7 +156,7 @@ class TFIDF(Scoring):
 
         return idf* np.sqrt(freq) * (1/np.sqrt(length))
 
-    def search(self,qurey,limit = 3):
+    def search(self,query,limit = 3):
 
         if self.terms:
 
@@ -182,5 +185,77 @@ class TFIDF(Scoring):
                 for x,score in scores
             ]
         return scores
+    
+    def batchsearch(self,queries,limit =3,threads = True):
+        threads =math.ceil(self.count()/25000) if isinstance(threads, bool) and threads else int(threads)
+        threads = min(max(threads,1), os.cpu_count())
+        results =[]
 
+
+        with ThreadPool(threads) as pool:
+            for result in pool.starmap(self.search,[(x,limit) for x in queries ]):
+                results.append(result)
+
+        return results
+    
+    def count(self):
+        return self.terms.count() if self.terms else self.total
+    
+    def weights(self,tokens):
+
+        length =len(tokens)
+        freq =self.computefreq(tokens)
+        freq= np.array([freq[token] for token in tokens])
+
+        idf = np.array([self.idf[token] if token in self.idf else self.avgidf for token in tokens])
+        weights =self.score(freq,idf,length).tolist()
+
+        if self.tags:
+            tags ={token: self.tags[token] for token in tokens if token in self.tags }
+
+            if tags:
+                maxWeight =max(weights)
+                maxTag = max(tags.values())
+                weights =[max(maxWeight * (tags[tokens[x]] / maxTag), weight) if tokens[x] in tags else weight for x, weight in enumerate(weights)]
+        return weights
+    
+    def computefreq(self,tokens):
+        return Counter(tokens)
+    
+    def load(self,path):
+
+        state =Serializer.load(path)
+        
+        for key in["docfreq","wordfreq","tags"]:
+            state[key]= Counter(state[key])
+
+        state['documents'] = dict(state['documents']) if state["documents"] else state["documents"]
+
+        self.__dict__.update(state)
+
+        if self.terms:
+
+            self.terms =Terms(self.config["terms"],self.score, self.idf)
+            self.terms.load(path +".terms")
+
+    def save(self,path):
+
+        skipfields ={"config","terms","tokenizer"}
+        state ={key: value  for key, value in self.__dict__.items() if key not in skipfields}
+
+        state["documents"] = list(state["documents"].items()) if state["documents"] else state["documents"]
+
+        Serializer.save(state,path)
+        if self.terms:
+            self.terms.save(path+".terms")
+
+    def issparse(self):
+        return self.terms is not None
+    
+    def isnormalized(self):
+        return self.normalize
+    
+    def close(self):
+        if self.terms:
+            self.terms.close()
 

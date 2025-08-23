@@ -16,7 +16,7 @@ class Labels(HFPipeline):
 
         else: 
 
-            function = "none" if multilabel is None else "sigmoid" if multilabel or len(labels) == 1 else "softmax"
+            function = "none" if multilabel is None else "sigmoid" if multilabel or len(self.labels()) == 1 else "softmax"
 
             results = self.pipeline(text, top_k=None, function_to_apply=function, num_workers=workers, **kwargs)
 

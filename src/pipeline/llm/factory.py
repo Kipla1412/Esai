@@ -7,7 +7,7 @@ from  ...util import Resolver
 class  GenerationFactory:
     
     @staticmethod
-    def create(path,method,kwargs):
+    def create(path,method,**kwargs):
 
         method = GenerationFactory.method(path,method)
 

@@ -15,12 +15,13 @@ class Vectors :
         self.config = config
         self.scoring =scoring
         self.models = models
-        self.tokenize =False
+        #self.tokenize =False
 
         if config :
 
             self.model = self.load(config.get("path"))
             self.encodebatch = self.config.get("encodebatch", 32)
+            self.tokenize = config.get("tokenize")
             #self.dimensionality = self.config.get("dimensionality")
 
     def loadmodel(self,path):

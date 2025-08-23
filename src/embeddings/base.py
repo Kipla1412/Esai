@@ -19,7 +19,7 @@ class Embeddings:
         self.scoring = None
         self.reducer = None
         self.ann = None
-        self.scoring = None
+        
 
         # self.ids =None
         # self.function = None
@@ -101,7 +101,7 @@ class Embeddings:
     def createann(self):
 
         if self.ann :
-            self.ann.close
+            self.ann.close()
 
         return ANNFactory.create(self.config) if self.config.get('path') or self.defaultallowed() else None 
     

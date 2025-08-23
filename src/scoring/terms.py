@@ -36,7 +36,7 @@ class Terms:
     )
     """
     DELETE_DOCUMENTS = "DELETE FROM documents"
-    INSERT_DOCUMENT ="INSERT OR REPLACE INTO documents VALUES(?, ?, ?)"
+    INSERT_DOCUMENT ="INSERT OR REPLACE INTO documents VALUES(?, ?, ?, ?)"
     SELECT_DOCUMENTS = "SELECT indexid, id, deleted, length FROM documents ORDER BY indexid"
 
     def __init__(self,config,score,idf):
@@ -73,7 +73,7 @@ class Terms:
         
         self.cachesize += 16
 
-        if self.cachesize >= self.cachelimits:
+        if self.cachesize >= self.cachelimit:
             self.index()
 
         self.ids.append(uid)
@@ -100,7 +100,7 @@ class Terms:
         ids.append(indexid)
         freqs.append(freq)
 
-    def index(self,uid,tokens):
+    def index(self):
         
         for term,(nuids, nfreqs) in self.terms.items():
             uids,freqs = self.lookup(term)
@@ -166,11 +166,11 @@ class Terms:
         # self.ids = ["doc1","doc2","doc3"]
         # self.ids.index("document") 
 
-    def search(self,query,limit):
+    def search(self,terms,limit):
 
         scores = np.zeros(len(self.ids), dtype= np.float32)
 
-        terms,skipped,hasscore = Counter(terms),{},False
+        terms,skipped,hasscores = Counter(terms),{},False
         for term, freq in terms.items():
 
             uids,weights = self.weights(term)#--> its return uids and weights --> doc freq,idf and document lengths like scoring
@@ -181,40 +181,40 @@ class Terms:
 
                     scores[uids] += freq * weights
 
-                    hasscore = True # uncommon word to create score
+                    hasscores = True # uncommon word to create score
 
                 else:
                     skipped = [term] # common word used for future merging
 
-            return self.topn(scores,limit,hasscore,skipped)
+            return self.topn(scores,limit,hasscores,skipped)
         
-    def topn(self,scores,limit,hasscore,skipped):
+    def topn(self,scores,limit,hasscores,skipped):
 
         topn = min(len(self.ids), limit* 5)
         matches = self.candidates(scores,topn)
 
-        self.merge(scores,matches,hasscore,skipped)
+        self.merge(scores,matches,hasscores,skipped)
 
-        if not hasscore:
+        if not hasscores:
 
             matches = self.candidates(scores,topn)
 
         matches = matches[np.argsort(-scores[matches])]
 
-        return [(self.ids[x], float(scores[x])) for x in matches[:limit] if scores > 0]
+        return [(self.ids[x], float(scores[x])) for x in matches[:limit] if scores[x] > 0]
     
     def candidates(self,scores,topn):
 
         scores[self.deletes] = 0
         return np.argpartition(scores, -topn)[-topn:]
     
-    def merge(self,scores,matches,hasscore,skipped):
+    def merge(self,scores,matches,hasscores,skipped):
         
         for term, freq in self.terms.items():
 
             uids,weights = self.weights(term)
 
-            if hasscore:
+            if hasscores:
 
                 indices = np.searchsorted(uids,matches)
 

@@ -54,3 +54,5 @@ class ANN:
                 "system": f"{platform.system()} ({platform.machine()})",
                 "txtai": __version__,
             }
+    def close(self):
+        self.backend = None

@@ -15,7 +15,7 @@ class CrossEncoder(HFPipeline):
         for q in [query] if isinstance(query,str) else query:
             results = self.pipeline([{"text":q ,"text-pair": t }for t in texts ] ,topk =None,funtion_to_apply ="none",num_workers=workers)
 
-            scores.append(self.function([r[0]["scores"] for r in results],multilabel))
+            scores.append(self.function([r[0]["score"] for r in results],multilabel))
         scores =[sorted(enumerate(row), key = lambda x:x[1], reverse= True)for row in scores]
         return scores[0] if isinstance(query,str) else scores
 

@@ -61,7 +61,7 @@ class RAG(Pipeline):
 
         return self.apply(inputs, names, queries, answers, topns, snippets) if isinstance(answers,list) else answers
     
-    def load(self,path,quantize,gpu,model,task,*kwargs):
+    def load(self,path,quantize,gpu,model,task,**kwargs):
 
         if not isinstance(path,str):
 
