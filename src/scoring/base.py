@@ -1,11 +1,11 @@
 
-from ..util import Resolver
+#from ..util import Resolver
 
 class Scoring:
 
     def __init__(self,config = None):
 
-        self.config = config if self.config is not None else {}
+        self.config = config if config is not None else {}
 
         columns = self.config.get("columns",{})
         self.text = columns.get("text","text")
@@ -30,5 +30,28 @@ class Scoring:
         raise NotImplementedError
 
     def search(self,idf):
+        raise NotImplementedError
+    
+    def batchsearch(selfself, queries, limit=3, threads=True):
+
+        raise NotImplementedError
+    
+    def count(self):
+        raise NotImplementedError
+    
+    def issparse(self):
+
+        raise NotImplementedError
+    
+    def isnormalized(self):
+        raise NotImplementedError
+        
+    def load(self,path):
+        raise NotImplementedError
+    
+    def save(self,path):
+        raise NotImplementedError
+    
+    def close(self):
         raise NotImplementedError
         

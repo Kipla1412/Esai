@@ -1,38 +1,30 @@
-from src.embeddings.base import Embeddings
 from src.pipeline.llm.rag import RAG
+from src.scoring.bm25 import BM25
 
-embed_config = {
-    "method": "sentence-transformers",
-    "path": "sentence-transformers/all-MiniLM-L6-v2",
-    "gpu": True,
-    "backend": "faiss"
-}
-
-# ---- First batch ----
 docs = [
-    ("1", {"text": "Hello, this is the first sentence."}),
-    ("2", {"text": "This is another example input for SBERT."}),
+    ("doc1", "Machine learning is amazing and widely used in AI applications.", None),
+    ("doc2", "Deep learning is a subset of machine learning that deals with neural networks.", None),
+    ("doc3", "Python is great for data science and has many useful libraries like pandas and numpy.", None),
+    ("doc4", "Natural Language Processing (NLP) helps computers understand human language.", None),
+    ("doc5", "Reinforcement learning is used in robotics and game AI to optimize decision making.", None),
+    ("doc6", "Computer vision allows machines to interpret and understand visual data.", None),
+    ("doc7", "Support Vector Machines are a type of supervised learning algorithm.", None),
+    ("doc8", "Clustering is an unsupervised learning technique for grouping similar data points.", None),
+    ("doc9", "Decision trees are easy to interpret and useful for classification problems.", None),
+    ("doc10", "Generative models can create new data similar to the input dataset.",None),
 ]
 
-emb = Embeddings(config=embed_config)
-emb.index(docs)   # ✅ no reindex, just normal index
+config ={"terms":{"cachelimit": 1000000,"cutoff":1.0},"content":True,"normalize":True,"k1": 1.5,"b": 0.75}
+bm25 =BM25(config=config)
+bm25.insert(docs)
 
-# ---- Second batch ----
-more_docs = [
-    ("3", {"text": "Sentence Transformers make semantic search easy."}),
-    ("4", {"text": "RAG combines retrieval and generation."}),
-]
+bm25.index()
 
-emb.index(more_docs)   # ✅ adds to same FAISS index, doesn’t wipe old ones
+rag =RAG( similarity=bm25, path ="facebook/bart-large-mnli", context=3)
 
-# ---- Use in RAG ----
-rag = RAG(
-    similarity=emb,
-    path="gpt2",
-    gpu=True,
-    context=2,
-    template="Answer based only on context:\n{context}\n\nQ: {question}\nA:",
-)
+questions =['What is machine learning?',"Tell me about Python data science"]
 
-answers = rag(["What is RAG?"])
-print(answers)
+answers =rag(questions)
+
+for q, a in zip(questions, answers):
+    print(f"Q: {q}\nA: {a}\n")

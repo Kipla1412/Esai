@@ -10,7 +10,7 @@ import numpy as np
 
 class TFIDF(Scoring):
 
-    def __init__(self,config):
+    def __init__(self,config =None):
 
         super().__init__(config)
 
@@ -41,7 +41,8 @@ class TFIDF(Scoring):
 
         self.tokenizer = None
 
-        self.terms = Terms(self.config["terms"], self.scoring,self.idf) if self.config.get("terms") else None
+         # Term index
+        self.terms = Terms(self.config["terms"], self.score, self.idf) if self.config.get("terms") else None
 
         self.documents = {} if self.config.get("content") else None
 
@@ -56,7 +57,7 @@ class TFIDF(Scoring):
 
             if isinstance(document,dict):
 
-                document = self.document.get(self.text, self.document.get(object))
+                document = self.documents.get(self.text, self.document.get(object))
 
             if document is not None:
 

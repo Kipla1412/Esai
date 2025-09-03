@@ -17,9 +17,9 @@ class Terms:
     CREATE_TERMS ="""
     
      CREATE TABLE IF NOT EXISTS terms(
-     terms TEXT PRIMARY KEY,
+     term TEXT PRIMARY KEY,
      ids BLOB,
-     freq BLOB
+     freqs BLOB
      )
     """
     INSERT_TERM = "INSERT OR REPLACE INTO terms VALUES (?, ?, ?)"
@@ -153,10 +153,7 @@ class Terms:
 
                 uids = np.frombuffer(uids ,dtype = np.int64)
 
-                weights = self.score(
-                    np.frombuffer(freqs, dtype = np.int64),
-                    self.idf[term], lengths[uids]
-                ).astype(np.float32)
+                weights = self.score(np.frombuffer(freqs, dtype=np.int64), self.idf[term], lengths[uids]).astype(np.float32)
             
             return uids,weights
         
@@ -184,13 +181,13 @@ class Terms:
                     hasscores = True # uncommon word to create score
 
                 else:
-                    skipped = [term] # common word used for future merging
+                    skipped[term] = freq# common word used for future merging
 
-            return self.topn(scores,limit,hasscores,skipped)
+        return self.topn(scores,limit,hasscores,skipped)
         
     def topn(self,scores,limit,hasscores,skipped):
 
-        topn = min(len(self.ids), limit* 5)
+        topn = min(len(scores), limit * 5)
         matches = self.candidates(scores,topn)
 
         self.merge(scores,matches,hasscores,skipped)
@@ -208,9 +205,9 @@ class Terms:
         scores[self.deletes] = 0
         return np.argpartition(scores, -topn)[-topn:]
     
-    def merge(self,scores,matches,hasscores,skipped):
+    def merge(self,scores,matches,hasscores,terms):
         
-        for term, freq in self.terms.items():
+        for term, freq in terms.items():
 
             uids,weights = self.weights(term)
 
@@ -222,4 +219,84 @@ class Terms:
 
                 uids, weights = uids[indices], weights[indices]
 
-            scores[uids] += freq * weights    
+            scores[uids] += freq * weights 
+
+    def count(self):
+        return len(self.ids) -len(self.deletes)
+
+    def load(self,path):
+
+        self.connection =self.connect(path)
+        self.cursor = self.connection.cursor()
+        self.path = path
+
+        self.ids,self.deletes,self.lengths = [],[],array("q")
+        self.cursor.execute(Terms.SELECT_DOCUMENTS)
+
+        for indexid,uid,deleted,length in self.cursor:
+
+            self.ids.append(uid)
+            
+            if deleted:
+                self.deletes.append(indexid)
+
+            self.lengths.append(length)
+
+            if all(uid.isdigit() for uid in self.ids):
+                self.ids =[int(uid) for uid in self.ids]
+            
+            self.weights.cache_clear()
+
+    def connect(self,path=""):
+
+        connection =sqlite3.connect(path, check_same_thread =False)
+
+        if self.config.get("WAL"):
+            connection.execute("PRAGMA Journal_mode =WAL")
+        return connection
+    
+    def save(self,path):
+
+        self.cursor.execute(Terms.DELETE_DOCUMENTS)
+
+        for i, uid in enumerate(self.ids):
+            self.cursor.execute(Terms.INSERT_DOCUMENT, [i, uid, 1 if i in self.deletes else 0, self.lengths[i]])
+
+        if not self.path:
+            self.connection.commit()
+
+            connection = self.copy(path)
+
+            self.connection.close()
+
+            self.connection = connection
+            self.cursor = self.connection.cursor()
+            self.path = path
+
+        elif self.path == path:
+
+            self.connection.commit()
+        else:
+
+            self.copy(path).close()
+
+    def copy(self,path):
+
+        if os.path.exists(path):
+            os.remove(path)
+        
+        connection = self.connect()
+
+        if self.connection.in_transaction:
+            for sql in self.connection.iterdump():
+                connection.execute(sql)
+
+        else:
+
+            self.connection.backup(connection)
+
+        return connection
+
+    def close(self):
+        if self.connection:
+            self.connection.close()

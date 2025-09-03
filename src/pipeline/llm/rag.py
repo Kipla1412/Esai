@@ -16,12 +16,12 @@ class RAG(Pipeline):
         self.model = self.load(path,quantize,gpu,model,task,**kwargs)
         self.tokenizer = tokenizer if tokenizer else Tokenizer() if hasattr(self.similarity,"scoring") and self.similarity.isweighted() else None
 
-        self.minscore = minscore if self.minscore is not None else 0.0
-        self.mintokens = mintokens if self.mintokens is not None else 0.0
+        self.minscore = minscore if minscore is not None else 0.0
+        self.mintokens = mintokens if mintokens is not None else 0.0
 
-        self.context = context if self.context else 3
+        self.context = context if context else 3
         self.output = output
-        self.template = template if self.template else "{question} {context}"
+        self.template = template if template else "{question} {context}"
 
         self.separator = separator
         self.system = system
@@ -90,7 +90,7 @@ class RAG(Pipeline):
             must = [token.strip("+") for token in query.split() if token.startswith("+") and len(token) > 1]
             mnot =[token.strip("-") for token in query.split() if token.startswith("-") and len(token) > 1]
 
-            segment = segments if texts else segment[i]
+            segment = segments if texts else segments[i]
             tokens = tokenlist if texts else tokenlist[i]
 
             # matches the query and context score
@@ -107,7 +107,7 @@ class RAG(Pipeline):
 
                     if score >= self.minscore and len(tokens[x]) >= self.mintokens :
 
-                        matches.append(segment[x],(score,))
+                        matches.append(segment[x]+(score,))
 
             results.append(matches)
 
@@ -134,7 +134,7 @@ class RAG(Pipeline):
             scores = self.similarity(queries,[t for _,t,_ in segments])
         elif texts:
 
-            scores = self.similarity.batchsimilarity([self.tokenize[x] for x in queries], tokenlist)
+            scores = self.similarity.batchsimilarity([self.tokenize(x) for x in queries], tokenlist)
         else:
             scores,segments,tokenlist = self.batchsearch(queries)
         
@@ -144,7 +144,7 @@ class RAG(Pipeline):
 
         scores,segments, tokenlist = [],[],[]
 
-        for results in self.similarity.batchsearch([self.tokenize[x] for x in queries], tokenlist):
+        for results in self.similarity.batchsearch([self.tokenize(x) for x in queries], tokenlist):
 
             scores.append([(result["id"],result["score"]) for result in results])
             segments.append([( result["id"], result["text"])for result in results])
@@ -185,7 +185,7 @@ class RAG(Pipeline):
     
     def apply(self,inputs,names,queries,answers,topns,snippets):
 
-        answers = self.snippets(names,queries,topns,snippets)
+        answers = self.snippets(names,answers,topns,snippets)
         
         if self.output == "flatten":
 
@@ -220,7 +220,7 @@ class RAG(Pipeline):
 
                         answer = text
                         break
-            results.append(names[x],answer)
+            results.append((names[x],answer))
 
         return results
     
@@ -241,21 +241,14 @@ class RAG(Pipeline):
 
                 index = scores[0][0][0]
 
-                reference = topn[index[0]]
+                reference = topn[index][0]
 
-            outputs.append((name,answer,topn))
+            outputs.append((name,answer,reference))
         return outputs
 
     def terms(self,queries):
 
-        return self.similarity.batchterms(queries) if hasattr(self.similarity,"batchsterms") else(queries)
-
-
-
-
-
-
-         
+        return self.similarity.batchterms(queries) if hasattr(self.similarity,"batchterms") else(queries)
 
     
 
