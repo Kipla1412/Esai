@@ -10,6 +10,9 @@ class Transform:
         self.action = action 
         self.checkpoint = checkpoint
 
+        self.scoring = embeddings.scoring if embeddings.issparse else None
+        self.indexes = embeddings.indexes
+
         self.config = embeddings.config
         self.model = embeddings.model
 
@@ -24,6 +27,7 @@ class Transform:
         self.object =columns.get("object","object")
 
         self.indexing = embeddings.model or embeddings.scoring
+        self.deletes = set()
 
     def __call__(self,documents,buffer):
 
@@ -80,4 +84,34 @@ class Transform:
                 yield document
                 offset += 1
 
+            batch.append(document)
+            if len(batch) == self.batch:
+                self.load(batch,offset)
+
+                batch,offset =[],0
+
+        if self.batch:
+
+            self.load(batch,offset)
+
+    def load(self,batch,offset):
+
+        if self.action == Action.UPSERT:
+
+            deletes =[uid for uid,_,_ in batch if uid not in self.deletes]
+
+            if deletes:
+                
+                self.delete(deletes)
+
+                self.deletes.update(deletes)
+
+        if self.scoring:
+
+            self.scoring.insert(batch,self.offset,self.checkpoint)
+
+        if self.indexes:
+            self.indexes.insert(batch, self.offset,self.checkpoint)
+
+        self.offset += offset
         

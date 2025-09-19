@@ -7,7 +7,7 @@ class Generation:
         self.template = template
         self.kwargs = kwargs
 
-    def __call__(self, text, maxlength, stream, stop, defaultrole=None, **kwargs):
+    def __call__(self, text, maxlength, stream, stop, defaultrole,stripthink, **kwargs):
         texts = [text] if isinstance(text, str) or isinstance(text[0], dict) else text
 
         if self.template:

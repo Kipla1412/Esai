@@ -83,6 +83,9 @@ class Faiss(ANN):
     
     def search(self,queries,limit):
 
+        self.backend.nprobe = self.nprope()
+        self.backend.nflip = self.setting("nflip", self.backend.nprobe)
+
         scores ,ids = self.backend.search(queries,limit)
 
         results =[]
@@ -93,8 +96,57 @@ class Faiss(ANN):
         return results
     
     def configure(self, count, train):
+
+        components = self.setting("components")
+
+        if components:
+
+            return self.components(components, train)
         
-        return "IDMap,Flat"
+        quantize = self.setting("quantize",self.config.get("quantize"))
+        quantize = 8 if isinstance(quantize, bool) else quantize
+
+        storage = f"SQ{quantize}"if quantize else "Flat" # small dataset to use flat
+        
+        if count <= 5000:
+            return "BFlat" if self.qbits else f"IDMap,{storage}"
+        
+        x = self.cells(train)
+        components = f"BIVF{x}"if self.qbits else f"IVF{x},{storage}"
+
+        return components
+    
+    def count(self):
+
+        return self.backend.ntotal
+    
+    def cells(self,count):
+
+        return max(min(round(4 * math.sqrt(count)), int(count/39)),1)
+    
+    def components(self,components,train):
+
+        x = self.cells(train)
+
+        components =[ f"IVF{x}" if components == "IVF" else component for component in components.split(",")] 
+
+        return ",".join(components)
+    
+    def nprope(self):
+
+        count = self.count()
+
+        default = 6  if count <= 5000 else round(self.cells(count)/16)
+        return self.setting("nprobe", default)
+    
+    def scores(self, scores):
+        
+        if self.qbits:
+
+            return np.clip(1.0 -(scores/(self.config["dimensions"]*8)), 0.0,1.0).tolist()
+        
+        return scores.tolist()
+
 
     def save(self,path):
 

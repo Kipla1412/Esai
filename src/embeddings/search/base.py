@@ -70,7 +70,7 @@ class Search:
 
                             uids[uid] += (1.0/(r+1)) * weights[v] # reciprocal rank fusion
 
-                results.append(sorted(uids.items(), key = lambda x:x[1], reverse= True [:limit]))
+                results.append(sorted(uids.items(), key = lambda x:x[1], reverse= True)[:limit])
 
             return results 
         

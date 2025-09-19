@@ -1,8 +1,10 @@
-
+import logging
 from .generation import Generation
 from .huggingface import HFGeneration
 from .litellm import LiteLLM
 from  ...util import Resolver 
+
+logger = logging.getLogger(__name__)
 
 class  GenerationFactory:
     
@@ -10,6 +12,8 @@ class  GenerationFactory:
     def create(path,method,**kwargs):
 
         method = GenerationFactory.method(path,method)
+        logger.info(f"Creating model with method={method}, path={path}")
+
 
         if method == "litellm":
             return LiteLLM(path,**kwargs)

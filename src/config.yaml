@@ -1,0 +1,96 @@
+
+
+
+method: "tool"
+max_steps: 5
+
+model:
+  path: "openrouter/meta-llama/llama-3.3-8b-instruct:free"
+  method: "litellm"
+  api_key: "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"
+  api_base: "https://openrouter.ai/api/v1"
+  temperature: 0.7
+
+tools:
+  - name: add_numbers
+    description: Add two numbers together
+    target: src.agent.check.number.add_numbers
+
+  - name: multiply
+    description: Multiply two numbers
+    target: src.agent.check.number.multiply
+
+  - name: weather_tool
+    description: Fetch live weather for a city
+    target: src.agent.tool.weather.weather_tool
+
+# agent:
+  
+#   math_agent:
+#     description: Does basic arithmetic
+#     llm: model
+#     tools:
+#       - name: add_numbers
+#         description: Add two numbers together
+#         target: src.agent.check.number.add_numbers
+
+#       - name: multiply
+#         description: Multiply two numbers
+#         target: src.agent.check.number.multiply
+
+
+  # weather_agent:
+  #   description: Answers weather questions
+  #   llm: model
+  #   tools:
+  #     - name: weather_tool
+  #       description: Fetch live weather for a city
+  #       target: src.agent.tool.weather.weather_tool
+
+
+
+# method: "tool"
+
+# max_steps: 5
+
+# model:
+#   path: "openrouter/meta-llama/llama-3.3-8b-instruct:free"
+#   method: "litellm"   
+#   api_key: "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"
+#   api_base: "https://openrouter.ai/api/v1" 
+#   temperature: 0.7
+
+# tools:
+#   - name: add_numbers
+#     description: Add two numbers together
+#     target: src.agent.check.number.add_numbers   
+#     inputs:
+#       a:
+#         type: int
+#         description: First number
+#       b:
+#         type: int
+#         description: Second number
+
+#   - name: multiply
+#     description: Multiply two numbers
+#     target: src.agent.check.number.multiply     
+#     inputs:
+#       a:
+#         type: int
+#         description: First number
+#       b:
+#         type: int
+#         description: Second number
+
+#   - name: weather_tool
+#     description: Fetch live weather for a given city using openweather api.
+#     target: src.agent.tool.weather.weather_tool
+#     inputs:
+#       city:
+#         type: string
+#         description: The city name
+#       units:
+#         type: string
+#         description: Units for temperature
+#         nullable: true

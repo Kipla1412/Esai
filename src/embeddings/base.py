@@ -172,6 +172,21 @@ class Embeddings:
         results = Search(self, indexids = graph)(queries,limit,weights,index,parameters)
 
         return [self.graph.filter(x) if isinstance(x,list) else x for x in results] if graph else results
+    
+    def similarity(self,query,data):
+
+        return self.batchsimilarity([query], data)[0]
+    
+    def batchsimilarity(self,queries,data):
+
+        queries =self.batchtransform(((None,query,None) for query in queries),"query")
+        data = self.batchtransform(((None,row,None) for row in data), "data")
+
+        model = self.findmodel()
+
+        scores = model.dot(queries,data)
+
+        return[sorted(enumerate(score), key =lambda x:x[1], reverse=True) for score in scores]
 
 
     def configure(self,config):

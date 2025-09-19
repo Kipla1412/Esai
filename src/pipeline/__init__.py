@@ -2,5 +2,6 @@ from .base import Pipeline
 from .hfpipeline import HFPipeline
 from .tensors import Tensors
 from .llm import *
-from .data import Tokenizer
+from .data import *
 from .text import *
+from .factory import PipelineFactory

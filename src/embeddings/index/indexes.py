@@ -8,6 +8,9 @@ class Indexes:
         self.embeddings = embeddings
         self.indexes =indexes
 
+        self.documents =None
+        self.checkpoint = None
+
         columns= embeddings.config.get("columns",{})
         self.text = columns.get("text","text")
         self.object = columns.get("object","object")
@@ -56,7 +59,7 @@ class Indexes:
                 batch.append((index,document,None))
                 index += 1
 
-            self.documents.add(batch)
+        self.documents.add(batch)
 
     def delete(self, ids):
 
@@ -67,7 +70,7 @@ class Indexes:
 
         for name,index in self.indexes.items():
 
-            index.index(self.documents, f"{self.checkpoint}/{name}"if self.checkpoint else None)
+            index.index(self.documents, f"{self.checkpoint}/{name}" if self.checkpoint else None)
 
             self.documents.close()
             self.documents = None
@@ -83,7 +86,7 @@ class Indexes:
 
     def save(self,path):
 
-        for name,index in self.Indexes.items():
+        for name,index in self.indexes.items():
 
             index.save(os.path.join(path,name))
 

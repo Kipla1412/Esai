@@ -1,5 +1,4 @@
-from huggingface_hub import scan_cache_dir
+# 
+from src.agent.tool.weather import weather_tool
 
-cache_info = scan_cache_dir()
-for repo in cache_info.repos:
-    print("Model:", repo.repo_id, "| Local path:", repo.repo_path)
+print(weather_tool("Madurai"))

@@ -19,10 +19,15 @@ class Vectors :
 
         if config :
 
+            self.initialized ="dimensions" in config
             self.model = self.load(config.get("path"))
             self.encodebatch = self.config.get("encodebatch", 32)
             self.tokenize = config.get("tokenize")
-            #self.dimensionality = self.config.get("dimensionality")
+            self.dimensionality = self.config.get("dimensionality")
+            self.instructions = self.config.get("instructions")
+
+            quantize =config.get("quantize")
+            self.qbits = max(min(quantize, 8), 1) if isinstance(quantize, int) and not isinstance(quantize, bool) else None
 
     def loadmodel(self,path):
 
@@ -45,9 +50,9 @@ class Vectors :
 
         return model
     
-    def transform(self,documents):
+    def transform(self,document):
 
-        return self.batchtransform([documents])[0]
+        return self.batchtransform([document])[0]
     
     def batchtransform(self,documents,category =None):
 
@@ -65,6 +70,10 @@ class Vectors :
 
         category= category if category else "query"
 
+        if self.instructions and category in self.instrictions and isinstance(data,str):
+
+            data = f"{self.instructions[category]}{data}"
+
         return data
     
     def tokens(self, data):
@@ -72,7 +81,11 @@ class Vectors :
         if self.tokenize and isinstance(data,str):
             data =Tokenizer.tokenize(data)
 
-        return data
+        if isinstance(data,list):
+
+            data = " ".join(data)
+
+        return data 
     
     def vectorize(self,data,category =None):
 
@@ -82,7 +95,15 @@ class Vectors :
 
         if embeddings is not None:
 
+            if self.dimensionality and self.dimensionality < embeddings.shape[1]:
+
+                embeddings = self.truncate(embeddings)
+
             embeddings = self.normalize(embeddings)
+
+            if self.qbits:
+
+                embeddings = self.quantize(embeddings)
 
         return embeddings
         
@@ -97,7 +118,12 @@ class Vectors :
             embeddings /= np.linalg.norm(embeddings)
 
         return embeddings
+    #Vector = [3, 4] → norm = √(3²+4²)=5 → normalized = [3/5, 4/5] = [0.6, 0.8].
     
+    def truncate(self,embeddings):
+
+        return embeddings[:, :self.dimensionality]
+
     def vectors(self,documents,batchsize = 500,checkpoint =None,buffer = None,dtype =None):
 
         ids,dimensions,batches,stream = self.index(documents,batchsize,checkpoint)
@@ -106,8 +132,8 @@ class Vectors :
         if ids:
             embeddings =np.memmap(buffer,dtype=dtype,shape=(len(ids),dimensions),mode ="w+")
 
-            x = 0
             with open(stream,"+rb") as queue :
+                x = 0
                 for _ in range(batches):
                     batch = self.loadembeddings(queue)
                     embeddings[x : x + batch.shape[0]] = batch
@@ -202,6 +228,19 @@ class Vectors :
     def dot(self,queries,data):
         
         return np.dot(queries,data.T).tolist()
+    
+    def quantize(self, embeddings):
+
+        factor = 2 ** (self.qbits - 1)
+
+        scalars = embeddings * factor
+        scalars = scalars.clip(-factor, factor - 1) + factor
+        scalars = scalars.astype(np.uint8)
+        bits = np.unpackbits(scalars.reshape(-1, 1), axis=1)
+
+        bits = bits[:, -self.qbits :]
+
+        return np.packbits(bits.reshape(embeddings.shape[0], embeddings.shape[1] * self.qbits), axis=1)
     
     def close(self):
 

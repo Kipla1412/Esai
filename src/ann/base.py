@@ -30,6 +30,10 @@ class ANN:
 
         raise NotImplementedError
     
+    def count(self):
+
+        raise NotImplementedError
+    
     def save (self,path):
 
         raise NotImplementedError

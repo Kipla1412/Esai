@@ -57,7 +57,7 @@ class TFIDF(Scoring):
 
             if isinstance(document,dict):
 
-                document = self.documents.get(self.text, self.document.get(object))
+                document = document.get(self.text, document.get(object))
 
             if document is not None:
 

@@ -71,7 +71,7 @@ class Terms:
 
             self.add(indexid,term,count)
         
-        self.cachesize += 16
+            self.cachesize += 16
 
         if self.cachesize >= self.cachelimit:
             self.index()
@@ -251,8 +251,9 @@ class Terms:
 
         connection =sqlite3.connect(path, check_same_thread =False)
 
-        if self.config.get("WAL"):
+        if self.config.get("WAL"): # Write Ahead Logging it used for read and write ata time 
             connection.execute("PRAGMA Journal_mode =WAL")
+
         return connection
     
     def save(self,path):
