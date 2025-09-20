@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 src/download
+src/config1.yaml
+src/config.yaml
+src/env.local
