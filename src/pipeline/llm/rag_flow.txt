@@ -25,6 +25,6 @@ agent:
     model:
       type: "InferenceClientModel"
       model_id: "mistralai/Mistral-7B-Instruct-v0.2"
-      token: "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"
+      token: ""
     tools:
       - type: "DuckDuckGoSearchTool"

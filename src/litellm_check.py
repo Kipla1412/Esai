@@ -2,7 +2,7 @@
 from src.pipeline.llm.litellm import LiteLLM
 import os
 
-# os.environ["GROQ_API_KEY"] ="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"
+# os.environ["GROQ_API_KEY"] =""
 
 # llm =LiteLLM(path ="groq/llama3-8b-8192")
 
@@ -16,7 +16,7 @@ import os
 
 # print("Response:",response)
 
-API_KEY = "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"
+API_KEY = ""
 
 MODEL_PATH = "openrouter/meta-llama/llama-3.3-8b-instruct:free"
 
