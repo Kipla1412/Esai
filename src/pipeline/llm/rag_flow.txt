@@ -16,15 +16,7 @@ APPLY FORMAT (flatten, reference, default)
    ↓
 FINAL OUTPUT
 
+get response 
 
 
 
-
-agent:
-  film_agent:
-    model:
-      type: "InferenceClientModel"
-      model_id: "mistralai/Mistral-7B-Instruct-v0.2"
-      token: "l"
-    tools:
-      - type: "DuckDuckGoSearchTool"
