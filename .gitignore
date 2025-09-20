@@ -4,4 +4,11 @@ __pycache__/
 src/download
 src/config1.yaml
 src/config.yaml
-src/env.local
+src/.env.local
+venv/
+.env
+.env.*      # any other env files
+
+*.log
+
+*.tmp
