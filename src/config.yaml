@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 method: "tool"
 max_steps: 5
 
@@ -108,3 +109,6 @@ tools:
 #         type: string
 #         description: Units for temperature
 #         nullable: true
+=======
+
+>>>>>>> 5f1e44bc6c582f6c8909ae10d382f00402a2d6a7

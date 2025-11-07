@@ -5,8 +5,13 @@ tabular:
   
 llm:
   method: litellm
+<<<<<<< HEAD
   path: openrouter/x-ai/grok-4-fast:free #path: openrouter/meta-llama/llama-3.3-8b-instruct:free
   api_key: ${OPENROUTER_API_KEY}
+=======
+  path: openrouter/meta-llama/llama-3.3-8b-instruct:free
+  api_key: 
+>>>>>>> 5f1e44bc6c582f6c8909ae10d382f00402a2d6a7
   api_base: https://openrouter.ai/api/v1
   temperature: 0.7
 
