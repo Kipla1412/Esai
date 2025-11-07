@@ -1,7 +1,7 @@
 llm:
   method: litellm
   path: openrouter/mistralai/mistral-nemo:free #openrouter/meta-llama/llama-3.3-8b-instruct:free #openrouter/alibaba/tongyi-deepresearch-30b-a3b:free #path: openrouter/x-ai/grok-4-fast:free #openrouter/alibaba/tongyi-deepresearch-30b-a3b:free
-  api_key: ${OPENROUTER_API_KEY}
+  api_key: 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 #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  #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 #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 #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 #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 #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
   api_base: https://openrouter.ai/api/v1
   temperature: 0.7
   #client: openai_client
