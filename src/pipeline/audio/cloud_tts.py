@@ -230,7 +230,7 @@ class CloudTextToSpeech:
 #     # 🎯 Example 2 — Groq (if you want to switch)
 #     tts = CloudTextToSpeech(
 #         endpoint_url="https://api.groq.com/openai/v1",
-#         api_key="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", # Use your actual key
+#         api_key="", # Use your actual key
 #         model="playai-tts",
 #         provider="groq",
 #         voice="Aaliyah-PlayAI" 

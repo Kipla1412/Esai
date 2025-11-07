@@ -6,7 +6,10 @@ from src.agent_workflow.agent import ConversationalAgent
 from src.pipeline.audio.transcription import CloudTranscription
 from src.pipeline.audio.cloud_tts import CloudTextToSpeech
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
 
 app.add_middleware(
@@ -20,7 +23,7 @@ chat_agent = ConversationalAgent()
 
 stt = CloudTranscription(
     endpoint_url="https://api-inference.huggingface.co",
-    api_key="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",
+    api_key=os.getenv["HUG_API_KEY"],
     model="openai/whisper-large-v3",
     provider="huggingface",
     chunk=10,
@@ -28,7 +31,7 @@ stt = CloudTranscription(
 )
 tts = CloudTextToSpeech(
     endpoint_url="https://api.groq.com/openai/v1",
-    api_key="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",
+    api_key=os.getenv["GROQ_API_KEY"],
     model="playai-tts",
     provider="groq",
     voice="Arista-PlayAI"
