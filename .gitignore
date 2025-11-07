@@ -8,7 +8,9 @@ src/.env.local
 venv/
 .env
 .env.*      # any other env files
-
+src/model
+src/examples
 *.log
-
+/mlruns
+/mlartifacts
 *.tmp

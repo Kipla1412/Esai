@@ -22,7 +22,7 @@ class WeatherTool(Tool):
 
     def forward(self,city:str,units:str ="metric"):
 
-        api_key ="fd27dd846e45b5c499adb5c4328047a8"
+        api_key = os.getenv["WEATHER_API_KEY"]
 
         if not api_key:
 

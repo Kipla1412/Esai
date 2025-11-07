@@ -1,13 +1,10 @@
-
-
-
 method: "tool"
 max_steps: 5
 
 model:
-  path: "openrouter/meta-llama/llama-3.3-8b-instruct:free"
+  path: openrouter/x-ai/grok-4-fast:free #path: "openrouter/meta-llama/llama-3.3-8b-instruct:free"
   method: "litellm"
-  api_key: "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"
+  api_key: ${OPENROUTER_API_KEY}
   api_base: "https://openrouter.ai/api/v1"
   temperature: 0.7
 
@@ -24,6 +21,23 @@ tools:
     description: Fetch live weather for a city
     target: src.agent.tool.weather.weather_tool
 
+  - name: execute_sql
+    description: Executes a SQL query against the database and returns the results.
+    target: src.agent.check.sql_tool.execute_sql
+
+  # - name: speech_text
+  #   description: coverts speech to text
+  #   target: src.agent.check.sql_tool.execute_sql
+
+  # - name: cloud_transcription
+  #   description: Transcribes audio into text
+  #   target: src.agent.check.transcrip_tool.CloudTranscriptionTool
+  #   params:
+  #     endpoint_url: "https://api-inference.huggingface.co/models"
+  #     api_key: ${HUG_API_KEY}
+  #     model: "openai/whisper-large-v3"
+  #     provider: "huggingface"
+      
 # agent:
   
 #   math_agent:
@@ -56,7 +70,7 @@ tools:
 # model:
 #   path: "openrouter/meta-llama/llama-3.3-8b-instruct:free"
 #   method: "litellm"   
-#   api_key: "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"
+#   api_key: ${OPENROUTER_API_KEY}
 #   api_base: "https://openrouter.ai/api/v1" 
 #   temperature: 0.7
 

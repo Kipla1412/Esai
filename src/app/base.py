@@ -2,7 +2,7 @@ import os
 import yaml
 
 from multiprocessing.pool import ThreadPool
-
+import inspect
 from ..pipeline import PipelineFactory
 from ..agent import Agent
 
@@ -29,6 +29,7 @@ class Application:
         self.createpipelines()
         
         self.createagents()
+        print("Loaded config for transcription_agent:", self.config.get("agent", {}).get("transcription_agent"))
 
 
     def createpipelines(self):
@@ -87,6 +88,7 @@ class Application:
             task["action"] = actions[0] if not isinstance(action, list) else actions        #return the values in their original form
 
         return task
+
     
     def function(self, function):
         """
@@ -99,9 +101,8 @@ class Application:
         if function in self.pipelines:
             return self.pipelines[function]     # callable object
         
-        
         return PipelineFactory.create({}, function)
-
+    
     def pipeline(self, name, *args, **kwargs):
         args = args[0] if args and len(args) == 1 and isinstance(args[0], tuple) else args
         

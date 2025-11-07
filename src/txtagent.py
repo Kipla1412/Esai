@@ -10,9 +10,13 @@ for tool in config["tools"]:
     if "target" in tool and isinstance(tool["target"], str):
         module_name, func_name = tool["target"].rsplit(".", 1)
         module = importlib.import_module(module_name)
+        #tool_class = getattr(module, class_name)
+        #target_obj =getattr(module, func_name)
         tool["target"] = getattr(module, func_name)
+        #tool["target"] = getattr(module, func_name)
 
 
 agent = Agent(**config)
 
-print(agent("what is current weather in Chennai? and What is 2 plus 3 times 4?"))
+#aprint(agent("What is the most expensive product in the Electronics category?"))
+print(agent("Transcribe the file D:/backend/sample.wav"))

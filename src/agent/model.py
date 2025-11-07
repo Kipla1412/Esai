@@ -21,6 +21,7 @@ class PipelineModel(Model):
 
         messages =self.clean(messages) 
         response = self.llm(messages,maxlength =self.maxlength,stop=stop_sequences,**kwargs)
+        print("\n[LLM raw response]:\n", response)
 
         # if "Thought:" in response and "Action:" in response:
            
